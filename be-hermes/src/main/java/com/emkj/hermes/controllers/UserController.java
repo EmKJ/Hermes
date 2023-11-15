@@ -44,11 +44,11 @@ public class UserController {
     public ResponseEntity<Map<String, String>> processRegistrationForm(@Valid @RequestBody User registrationFormData, HttpServletRequest request){
        
         
-        User newUser = new User(registrationFormData.getUsername(), registrationFormData.getPwHash());
+        User newUser = new User(registrationFormData.getUsername(), registrationFormData.getPassword());
         userRepository.save(newUser);
         setUserInSession(request.getSession(), newUser);
         
-            responseBody.put("message","Successfully added new user"+ newUser);
+            responseBody.put("message","Successfully added new user "+ newUser);
             response = ResponseEntity
                             .status(HttpStatus.CREATED)
                             .body(responseBody);
@@ -69,9 +69,9 @@ public class UserController {
                 return response;
             }
         
-            String pwHash = theUser.getPwHash();
-            String loginPass = loginFormData.getPwHash();
-            if (!loginPass.equalsIgnoreCase(pwHash)) {
+            String password = theUser.getPassword();
+            String loginPass = loginFormData.getPassword();
+            if (!loginPass.equalsIgnoreCase(password)) {
                 responseBody.put("message", "Invalid password");
                 response = ResponseEntity
                             .status(HttpStatus.UNAUTHORIZED)

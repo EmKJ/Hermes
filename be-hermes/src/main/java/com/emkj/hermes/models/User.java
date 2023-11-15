@@ -1,7 +1,5 @@
 package com.emkj.hermes.models;
 
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
@@ -13,6 +11,7 @@ public class User {
     @GeneratedValue
     private int id;
     private String username;
+    private String password;
     private String pwHash;
 
     public User () {}
@@ -20,11 +19,12 @@ public class User {
     public User (String username, String password) {
         this.username = username;
         // this.pwHash = encoder.encode(password);
-        this.pwHash = password;
+        this.password = password;
     }
     
     public int getId() { return id; }
     public String getUsername(){ return username; }
+    public String getPassword(){ return password; }
     public String getPwHash() { return pwHash; } 
     
 }

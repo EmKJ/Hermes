@@ -1,14 +1,35 @@
 <div class="register-form-container">
-   <form [formGroup]="registrationForm" (ngSubmit)="onSubmit()">
-       
-            <label for="username">Username</label>
-            <input type="type" formControlName="username">
-        
-        
-            <label for="password">Enter your password</label>
-            <input  formControlName="password" type="password">
-        
-            <button type="submit">Submit</button>
+   <form 
+   [formGroup]="registrationForm"
+   >
+
+       <mat-form-field appearance="outline">
+            <mat-label for="username">Username</mat-label>
+            <input matInput 
+            id = "username" 
+            formControlName="username" 
+            name = "username"
+            required>
+            <mat-hint>Please choose a name at least 5 characters long.</mat-hint>
+            <mat-error *ngIf="registrationForm.value.username">{{getErrorMessage("username")}}</mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+            <mat-label for="password">Password</mat-label>
+            <!-- <input  matInput [type]="hide ? 'password' : 'text'"> -->
+            <input formControlName="password" matInput [type]="hide ? 'password' : 'text'">
+            <button mat-icon-button matSuffix (click)="hide = !hide" [attr.aria-label]="'Hide password'" [attr.aria-pressed]="hide">
+                <mat-icon>{{hide ? 'visibility_off' : 'visibility'}}</mat-icon>
+              </button>
+            <mat-hint>Must be 6 chars long and contain one number and one uppercase letter.</mat-hint>
+            <mat-error *ngIf="registrationForm.value.password">{{getErrorMessage("password")}}</mat-error>
+        </mat-form-field>
+            <button 
+            mat-raised-button 
+            color="primary" 
+            type="submit" 
+            [disabled]="!registrationForm.valid"
+            (click)="onSubmit()" >Submit</button>
         
     </form>
 </div>
