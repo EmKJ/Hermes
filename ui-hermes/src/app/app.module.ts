@@ -22,6 +22,7 @@ import { FooterComponent } from './footer/footer.component';
 import { MuiApiTableComponent } from './mui-api-table/mui-api-table.component';
 import { MuiNavComponent } from './mui-nav/mui-nav.component';
 import { UserRegisterComponent } from './user-register/user-register.component';
+import { UserLoginComponent } from './user-login/user-login.component';
 
 @NgModule({
   declarations: [
@@ -29,7 +30,8 @@ import { UserRegisterComponent } from './user-register/user-register.component';
     FooterComponent,
     MuiNavComponent,
     MuiApiTableComponent,
-    UserRegisterComponent
+    UserRegisterComponent,
+    UserLoginComponent
   ],
   imports: [
     BrowserModule,

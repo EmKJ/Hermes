@@ -1,8 +1,9 @@
 import { Component } from '@angular/core';
-import { FormGroup, FormControl, Validators, ValidationErrors, ValidatorFn} from '@angular/forms';
-import { Observable } from 'rxjs';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { FormBuilder, FormGroup, FormControl, Validators, AbstractControlOptions, ValidationErrors, ValidatorFn, AbstractControl} from '@angular/forms';
 import { HttpErrorResponse } from '@angular/common/http';
+import { Router } from '@angular/router';
+import { UserService } from '../_services/user.service';
+import { MustMatch } from '../_helper/must-match.validator';
 
 @Component({
   // providers: [{provide: MatFormFieldModule}],
@@ -12,70 +13,64 @@ import { HttpErrorResponse } from '@angular/common/http';
 })
 export class UserRegisterComponent {
 
-  registrationForm = new FormGroup({
-    username: new FormControl('', [Validators.required, Validators.minLength(5)]),
-    password: new FormControl('', [Validators.required, Validators.pattern('(?=.*[\\d])(?=.*[A-Z])[a-zA-Z\\d\\S]*'), Validators.minLength(6)]),
-  }); 
+  registrationForm!:FormGroup;
 
   hide = true;
   
-  constructor( private http: HttpClient) { }
+  constructor(  
+    private router: Router,
+    private userService: UserService,
+    ) {}
   
   get name() { return this.registrationForm.get('username'); }
   
-  ngOnInit(): void { }
+  ngOnInit(): void { 
+    this.registrationForm = new FormGroup({
+      username: new FormControl('', [Validators.required, Validators.pattern('[a-zA-Z\\d]*'),Validators.minLength(5)]),
+      password: new FormControl('', [Validators.required, Validators.pattern('(?=.*[\\d])(?=.*[A-Z])[a-zA-Z\\d\\S]*'), Validators.minLength(6)]),
+      verifyPassword: new FormControl('', Validators.required)
+    }, {
+      validators: [MustMatch('password', 'verifyPassword')]
+    }
+    );
+  }
 
   getErrorMessage(controlName:string) {
     if (controlName === "username"){
-      return this.registrationForm.get('username')?.hasError('required')? 'You must enter a value':
-      this.registrationForm.get('username')?.hasError('minlength')? 'Must be 5 chars long':"username error"; 
+      let controlValue = this.registrationForm.get('username');
+      return controlValue?.value?.includes(" ")? 'Space is not a valid character':
+        controlValue?.hasError('minlength')? 'Must be 5 chars long':
+        controlValue?.hasError('pattern')? 'Please use only alphanumeric characters':"username error"; 
     }
   
     if (controlName === "password"){
-      return this.registrationForm.get('password')?.hasError('minlength')? 'Must be 6 chars long':
-      this.registrationForm.get('password')?.hasError('pattern')? 'Must contain an uppercase and a number':"password error"; 
+      let controlValue = this.registrationForm.get('password');
+      return controlValue?.value?.includes(" ")? 'Space is not a valid character':
+        controlValue?.hasError('minlength')? 'Must be 6 chars long':
+        controlValue?.hasError('pattern')? 'Must contain an uppercase and a number':"password error"; 
+    }
+
+    if (controlName === "verifyPassword"){
+      let controlValue = this.registrationForm.get('verifyPassword');
+      return (controlValue?.value !== this.registrationForm.get('password')?.value) ? 'Passwords don\'t match':"password error"; 
     }
 
     return "";
-  
-}
-  
+  }
   
   onSubmit():void {
-    // TODO: Use EventEmitter with form value
-    console.warn(this.registrationForm.value);
+    console.log(this.registrationForm.value);
      if (this.registrationForm.invalid) {
       return;
      }  
-    this.registerNewUser(this.registrationForm.value).subscribe({
-       next (response: Observable<String>) {
-        // console.log(response);
-          // if(response.username != undefined){
-            // this.router.navigate(['user/login'])
-            console.log("user undefined")
-            console.log(response)
-          // }
+    this.userService.registerNewUser(this.registrationForm.value).subscribe({
+       next: (response) => {
+        console.log(response);
+          this.router.navigate(['user/login']);
         },
       error (err: HttpErrorResponse) {
         alert(err.message);
       }
     });
-  }
-
-  public registerNewUser(userRegister:any): Observable<any> {
-    const httpOptions = {
- 	 	headers: new HttpHeaders(
-    //   // {'Content-Type': 'application/json',
-    //   // 'Access-Control-Allow-Origin': '*'}
-      )
-	  }
-    httpOptions.headers.append('Access-Control-Allow-Origin', 'http://localhost:8080');
-    httpOptions.headers.append('Access-Control-Allow-Methods', 'GET, POST, PUT, PATCH, POST, DELETE, OPTIONS');
-    httpOptions.headers.append('Access-Control-Allow-Headers', 'Content-Type');
-    httpOptions.headers.append('Access-Control-Max-Age', '86400');
-    httpOptions.headers.append('Content-Type', 'application/json');
-    httpOptions.headers.append('Content-Type', 'application/x-www-form-urlencoded; charset=UTF-8')
-     
-     return this.http.post<any>(`http://localhost:8080/user/register`, userRegister, httpOptions);
   }
 }
